@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>n8n Assessment — Patry AI Fellowship</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#f4f4f6;color:#1a1a2e}
+  .page{max-width:820px;margin:0 auto;padding:32px 20px 64px}
+  .top-bar{background:#1a1a2e;color:white;padding:22px 32px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px}
+  .top-bar h1{font-size:1.1rem;font-weight:700}
+  .tag{font-size:.72rem;background:#4f46e5;padding:4px 12px;border-radius:20px;white-space:nowrap;align-self:center}
+  .subbar{background:#2d2d50;color:rgba(255,255,255,.65);padding:10px 32px;border-radius:0 0 12px 12px;font-size:.76rem;display:flex;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+  .card{background:white;border-radius:10px;border:1px solid #e0e0e8;margin-bottom:20px;overflow:hidden}
+  .ch{padding:13px 22px;background:#f8f8fc;border-bottom:1px solid #e8e8f0;display:flex;align-items:center;gap:8px}
+  .ch h2{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#4f46e5}
+  .cb{padding:20px 22px;font-size:.88rem;line-height:1.75;color:#333}
+  .cb p+p{margin-top:10px}
+  .hl{background:#eef2ff;border-left:4px solid #4f46e5;padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:.86rem;line-height:1.7}
+  .hl strong{color:#4f46e5}
+  .warn{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:13px 16px;font-size:.82rem;color:#92400e;line-height:1.6;margin-top:12px}
+  .tip{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:13px 16px;font-size:.82rem;color:#166534;line-height:1.6;margin-top:12px}
+  .info{background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:13px 16px;font-size:.82rem;color:#3730a3;line-height:1.6;margin-top:12px}
+
+  .setup-step{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f0f0f8}
+  .setup-step:last-child{border-bottom:none}
+  .snum{background:#4f46e5;color:white;width:26px;height:26px;border-radius:50%;font-size:.74rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+  .stitle{font-weight:600;font-size:.88rem;margin-bottom:3px}
+  .sdesc{font-size:.81rem;color:#555;line-height:1.6}
+  .sdesc code{background:#f0f0f8;border-radius:4px;padding:1px 6px;font-size:.78rem;color:#4f46e5;font-family:monospace}
+
+  .sheet-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px}
+  .sheet-card{border-radius:8px;padding:14px 16px;border:1px solid #e0e0e8}
+  .sheet-card.ro{background:#fafafe;border-color:#e0e0ee}
+  .sheet-card.rw{background:#f0fdf4;border-color:#bbf7d0}
+  .sheet-icon{font-size:1.1rem;margin-bottom:5px}
+  .sheet-title{font-size:.8rem;font-weight:700;margin-bottom:3px}
+  .sheet-title.ro-label{color:#4f46e5}
+  .sheet-title.rw-label{color:#15803d}
+  .sheet-desc{font-size:.74rem;color:#555;line-height:1.5;margin-bottom:8px}
+  .sheet-badge{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:10px}
+  .badge-ro{background:#eef2ff;color:#4f46e5}
+  .badge-rw{background:#dcfce7;color:#15803d}
+
+  .del-item{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid #f0f0f8}
+  .del-item:last-child{border-bottom:none}
+  .dnum{background:#1a1a2e;color:white;width:26px;height:26px;border-radius:50%;font-size:.74rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+  .dtitle{font-weight:600;font-size:.88rem;margin-bottom:3px}
+  .ddesc{font-size:.81rem;color:#555;line-height:1.6}
+  .dhow{background:#f8f8fc;border-radius:6px;padding:8px 12px;margin-top:7px;font-size:.78rem;color:#333;line-height:1.55;border-left:3px solid #4f46e5}
+
+  .score-table{width:100%;border-collapse:collapse;font-size:.81rem}
+  .score-table th{background:#1a1a2e;color:white;padding:9px 14px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em}
+  .score-table td{padding:10px 14px;border-bottom:1px solid #f0f0f5;vertical-align:top;line-height:1.5;color:#333}
+  .score-table tr:last-child td{border-bottom:none}
+  .score-table tr:nth-child(even) td{background:#fafafe}
+  .wt{font-weight:800;color:#4f46e5;white-space:nowrap}
+  .gate-row td{background:#fff0f0!important}
+
+  .code-block{background:#1a1a2e;color:#a5b4fc;border-radius:8px;padding:14px 16px;margin-top:10px;font-size:.74rem;font-family:monospace;line-height:1.7;white-space:pre-wrap;position:relative}
+  .copy-btn{position:absolute;top:8px;right:10px;background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.6);font-size:.65rem;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:inherit}
+  .copy-btn:hover{background:rgba(255,255,255,.2);color:white}
+
+  .req-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .req-box{background:#f8f8fc;border:1px solid #e0e0ee;border-radius:8px;padding:12px 14px;font-size:.8rem;line-height:1.55}
+  .req-box strong{display:block;margin-bottom:3px;font-size:.78rem}
+
+  .tl-row{display:flex;gap:0}
+  .tl-step{flex:1;text-align:center;position:relative}
+  .tl-step::before{content:'';position:absolute;top:12px;left:50%;right:-50%;height:2px;background:#e0e0ee;z-index:0}
+  .tl-step:last-child::before{display:none}
+  .tl-dot{width:26px;height:26px;border-radius:50%;background:#4f46e5;color:white;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;position:relative;z-index:1}
+  .tl-lbl{font-size:.71rem;color:#555;line-height:1.4}
+  .tl-time{font-size:.67rem;color:#aaa;margin-top:2px}
+
+  .con-row{display:flex;flex-wrap:wrap;gap:9px;padding:16px 22px}
+  .con-chip{background:#f8f8fc;border:1px solid #e0e0ee;border-radius:20px;padding:5px 13px;font-size:.78rem;color:#444}
+  .footer{text-align:center;font-size:.71rem;color:#bbb;margin-top:28px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="top-bar">
+    <div>
+      <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#a5b4fc;margin-bottom:5px">Patry AI Fellowship &middot; Stage 2 Assessment</div>
+      <h1>n8n Workflow Challenge</h1>
+    </div>
+    <span class="tag">Technical Gate &mdash; 65/100 to Advance</span>
+  </div>
+  <div class="subbar">
+    <span>&#128296; Build in your own n8n environment</span>
+    <span>&#128202; Standardized data provided</span>
+    <span>&#127909; 5-min video required</span>
+  </div>
+
+  <!-- CONTEXT -->
+  <div class="card">
+    <div class="ch"><span>&#127962;</span><h2>Context</h2></div>
+    <div class="cb">
+      <p>Patry is a Kingston-based, vertically integrated commercial real estate and property management company operating across construction, leasing, design, finance, and property management — moving fast with real customers and real deadlines. For Summer 2026, Patry is running an AI implementation mandate across all divisions with a collective target of <strong>seven-figure</strong> measurable value. </p>
+      <p>You have advanced to Stage 2 of the Fellowship selection process. This is your technical gate.</p>
+    </div>
+  </div>
+
+  <!-- SCENARIO -->
+  <div class="card">
+    <div class="ch"><span>&#128203;</span><h2>The Scenario</h2></div>
+    <div class="cb">
+      <div class="hl">
+        <strong>The Problem:</strong> Patry's property management team receives approximately 50 tenant maintenance requests per week via email. Each request is currently logged manually into a spreadsheet, categorized by urgency and trade type, and assigned to a contractor via a follow-up email. The process takes a staff member roughly <strong>6&ndash;8 hours per week</strong> and is prone to delays and missed requests.
+      </div>
+      <p>You have been given access to 2.5 weeks of real intake data from this process &mdash; 51 rows of tenant maintenance requests and a contractor directory of 10 tradespeople. The data is intentionally messy. It reflects what actually arrives in a property management inbox.</p>
+      <!-- <div class="warn">&#9888;&#65039; <strong>Important:</strong> The data contains deliberate edge cases &mdash; missing contact information, duplicate submissions, ambiguous urgency signals, and at least one non-English request. How your workflow handles these will significantly affect your score. A workflow that breaks silently on bad data scores much lower than one that handles errors gracefully.</div> -->
+    </div>
+  </div>
+
+  <!-- TASK -->
+  <div class="card">
+    <div class="ch"><span>&#127919;</span><h2>Your Task</h2></div>
+    <div class="cb">
+      <p>Build a working n8n workflow that automates the maintenance request process end-to-end. Your workflow must complete all five steps below:</p>
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:0">
+        <div class="setup-step">
+          <div class="snum">1</div>
+          <div><div class="stitle">Read the Maintenance Inbox</div><div class="sdesc">Connect to the provided Google Sheet and read incoming maintenance request rows.</div></div>
+        </div>
+        <div class="setup-step">
+          <div class="snum">2</div>
+          <div><div class="stitle">Classify each request using AI</div><div class="sdesc">Use the provided API via an <strong>HTTP Request node</strong> to extract the <strong>urgency level</strong> (Emergency or Standard) and <strong>trade type</strong> (Plumbing, Electrical, HVAC, General, Appliance, Roofing/Structure) from the free-text description. Your prompt must ask the model to explain its urgency reasoning &mdash; not just output a label. Configuration instructions and a reference snippet are provided in the setup section below.</div></div>
+        </div>
+        <div class="setup-step">
+          <div class="snum">3</div>
+          <div><div class="stitle">Match to the correct contractor</div><div class="sdesc">Look up the Contractor Directory and assign the right contractor based on both trade type AND urgency tier. Emergency requests must go to an Emergency-tier contractor &mdash; not a Standard-tier one.</div></div>
+        </div>
+        <div class="setup-step">
+          <div class="snum">4</div>
+          <div><div class="stitle">Send or simulate a contractor notification</div><div class="sdesc">Either send a live email or Slack message to the assigned contractor using your own credentials, OR use an n8n Set node to construct the notification payload. Both are acceptable.</div></div>
+        </div>
+        <div class="setup-step">
+          <div class="snum">5</div>
+          <div><div class="stitle">Log every outcome to your Output Log</div><div class="sdesc">Every row &mdash; completed, skipped (duplicate), or errored (missing data) &mdash; must produce a row in your personal Output Log sheet.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- DATA SHEETS -->
+  <div class="card">
+    <div class="ch"><span>&#128202;</span><h2>Your Data &mdash; Three Google Sheets</h2></div>
+    <div class="cb">
+      <p>Three sheets are provided. Two are read-only &mdash; connect to them directly. One is a template you copy to your own Google Drive and write your results to.</p>
+      <div class="sheet-grid">
+        <div class="sheet-card ro">
+          <div class="sheet-icon">&#128229;</div>
+          <div class="sheet-title ro-label"><a href="https://docs.google.com/spreadsheets/d/1uRPEnJZqz553a_zQsXae5chn6z2ZKiF3Uf_M_p7e7Ug/edit?gid=0#gid=0" target="_blank" style="color:#4f46e5;text-decoration:none">Maintenance Inbox &#8599;</a></div>
+          <div class="sheet-desc">51 rows of tenant requests across 2.5 weeks. Free-text descriptions. Deliberate edge cases embedded. <strong>Read only &mdash; do not edit.</strong></div>
+          <span class="sheet-badge badge-ro">&#128274; Read Only</span>
+        </div>
+        <div class="sheet-card ro">
+          <div class="sheet-icon">&#127959;&#65039;</div>
+          <div class="sheet-title ro-label"><a href="https://docs.google.com/spreadsheets/d/1-TGs9Ha9vehXBLK2qfT2qb6Cibk92L4QQBEByT8zXOE/edit?gid=0#gid=0" target="_blank" style="color:#4f46e5;text-decoration:none">Contractor Directory &#8599;</a></div>
+          <div class="sheet-desc">10 contractors across 5 trade types. Each has an Emergency or Standard priority tier. Match on both trade type AND tier. <strong>Read only &mdash; do not edit.</strong></div>
+          <span class="sheet-badge badge-ro">&#128274; Read Only</span>
+        </div>
+        <div class="sheet-card rw">
+          <div class="sheet-icon">&#128228;</div>
+          <div class="sheet-title rw-label"><a href="https://docs.google.com/spreadsheets/d/1kdgJ-B02bxIDX_jDafiXhojonwkM3kbiewTE758fHgo/edit?gid=0#gid=0" target="_blank" style="color:#15803d;text-decoration:none">Output Log Template &#8599;</a></div>
+          <div class="sheet-desc">Make a copy to your own Google Drive (<strong>File &rarr; Make a copy</strong>). Your workflow writes results here. Includes 3 example rows showing the expected format. Do not delete them.</div>
+          <span class="sheet-badge badge-rw">&#9999;&#65039; Your Copy</span>
+        </div>
+      </div>
+      <div class="tip" style="margin-top:14px">&#128161; <strong>Connecting the sheets:</strong> The Maintenance Inbox and Contractor Directory are publicly readable &mdash; no authentication required to read them. For your Output Log copy, you will authenticate with your own Google account via the Google Sheets node in n8n.</div>
+    </div>
+  </div>
+
+  <!-- ENVIRONMENT SETUP -->
+  <div class="card">
+    <div class="ch"><span>&#9881;&#65039;</span><h2>Setting Up Your Environment</h2></div>
+    <div class="cb">
+      <p>You will build and test your workflow in your own n8n environment. Choose the option that works best for you &mdash; both are scored identically.</p>
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:0">
+        <div class="setup-step">
+          <div class="snum">A</div>
+          <div>
+            <div class="stitle">n8n Cloud Free Trial <span style="background:#dcfce7;color:#15803d;font-size:.65rem;padding:2px 7px;border-radius:10px;font-weight:700;margin-left:6px">RECOMMENDED</span></div>
+            <div class="sdesc">Visit <code>n8n.io</code> &rarr; Get Started &rarr; create a free account. No credit card required. You receive a 14-day Pro trial with 1,000 executions. Your workspace will be at <code>[yourname].n8n.cloud</code>.<br><br>
+            <strong>Important:</strong> Before your trial expires, export your workflow as a JSON file (three-dot menu &rarr; Download). This is part of your submission.</div>
+          </div>
+        </div>
+        <div class="setup-step">
+          <div class="snum">B</div>
+          <div>
+            <div class="stitle">n8n Self-Hosted (Local)</div>
+            <div class="sdesc">Install n8n locally &mdash; free forever with no execution limits.<br>
+            Via npm: <code>npm install -g n8n</code> then <code>n8n start</code><br>
+            Via Docker: <code>docker run -it --rm --name n8n -p 5678:5678 docker.n8n.io/n8nio/n8n</code><br>
+            Access at <code>localhost:5678</code>.</div>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size:.82rem;font-weight:700;margin:18px 0 8px;color:#1a1a2e">You will also need:</p>
+      <div class="req-grid">
+        <div class="req-box">
+          <strong>&#129302; Anthropic API Key &mdash; Provided by Patry</strong>
+          You do not need to create your own Anthropic account or add any billing. Patry has provided a shared API key for this assessment. It is included in your welcome email. Use the key exactly as provided &mdash; do not share it or use it outside this assessment.
+          <div class="info" style="margin-top:8px">&#8505;&#65039; The key is pre-loaded with sufficient credit for all 51 rows plus multiple test runs. You will not run out during normal use.</div>
+        </div>
+        <div class="req-box">
+          <strong>&#128202; Google Account</strong>
+          Any personal Google account. Used to make a copy of the Output Log template and authenticate the Google Sheets write node. The read sheets require no authentication.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANTHROPIC API SETUP -->
+  <div class="card">
+    <div class="ch"><span>&#129302;</span><h2>Anthropic API &mdash; HTTP Request Node Configuration</h2></div>
+    <div class="cb">
+      <p>This assessment uses the Anthropic API via n8n's <strong>HTTP Request node</strong> rather than a pre-built AI node. This is intentional &mdash; configuring a raw API call is part of what is being assessed. The reference below gives you the exact structure. How you integrate it into your workflow, prompt it, and parse its output is up to you.</p>
+
+      <div class="hl" style="margin-top:14px">
+        <strong>Model to use:</strong> <code style="background:#dde4ff;color:#3730a3;padding:2px 8px;border-radius:4px;font-size:.85rem">claude-haiku-4-5-20251001</code><br>
+        <strong>Your API key:</strong> Provided in your welcome email. Copy it exactly &mdash; do not add spaces or line breaks.
+      </div>
+
+      <p style="margin-top:14px;font-size:.84rem;font-weight:600;color:#1a1a2e">HTTP Request Node Settings:</p>
+      <div class="code-block">
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>Method:  POST
+URL:     https://api.anthropic.com/v1/messages
+
+Headers:
+  x-api-key:          [YOUR API KEY FROM WELCOME EMAIL]
+  anthropic-version:  2023-06-01
+  content-type:       application/json
+
+Body (JSON):
+{
+  "model": "claude-haiku-4-5-20251001",
+  "max_tokens": 300,
+  "messages": [
+    {
+      "role": "user",
+      "content": "You are a property management assistant. Classify the following maintenance request.\n\nRequest: {{ $json.description }}\n\nReturn a JSON object with exactly these fields:\n- urgency: either 'Emergency' or 'Standard'\n- trade_type: one of 'Plumbing', 'Electrical', 'HVAC', 'General', 'Appliance', 'Roofing/Structure'\n- reasoning: one sentence explaining your urgency classification\n\nReturn only valid JSON. No preamble or explanation outside the JSON object."
+    }
+  ]
+}</div>
+
+      <p style="margin-top:16px;font-size:.84rem;font-weight:600;color:#1a1a2e">Parsing the Response:</p>
+<p style="font-size:.81rem;color:#555;line-height:1.65;margin-top:6px">The API returns a JSON object. Your classification result is a text string nested inside it at:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>{{ $json.content[0].text }}</div>
+<p style="font-size:.81rem;color:#555;line-height:1.65;margin-top:10px">That string is itself a JSON object &mdash; so you need to convert it into separate values before the rest of your workflow can use <code>urgency</code>, <code>trade_type</code>, and <code>reasoning</code>. Add a <strong>Code node</strong> immediately after the HTTP Request node and paste in the following:</p>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>const raw = $input.item.json.content[0].text;
+const result = JSON.parse(raw);
+return [{ json: result }];</div>
+<p style="font-size:.81rem;color:#555;line-height:1.65;margin-top:10px">After this node runs, <code>urgency</code>, <code>trade_type</code>, and <code>reasoning</code> will be available as individual fields you can reference in downstream nodes like any other value. If you prefer not to use a Code node, a Set node with <strong>Expression</strong> mode can also extract individual fields using expressions like <code>{{ JSON.parse($json.content[0].text).urgency }}</code>.</p>
+<div class="tip">&#128161; <strong>Testing tip:</strong> Run the HTTP Request node and Code node together on a single test row first. Open the output panel and confirm you can see <code>urgency</code>, <code>trade_type</code>, and <code>reasoning</code> as separate fields before building the rest of your workflow.</div>
+    </div>
+  </div>
+
+  <!-- SUBMISSION -->
+  <div class="card">
+    <div class="ch"><span>&#128230;</span><h2>Your Submission &mdash; 4 Required Components</h2></div>
+    <div class="cb">
+      <div class="info" style="margin-bottom:18px">&#128161; <strong>Couldn't get it all the way across the line?</strong> Submit anyway. If you hit a wall &mdash; a node that won't behave, a parsing step that isn't clicking &mdash; document it. In your video, walk us through what you tried, where you got stuck, and how you thought about the problem. In your ROI note, tell us what you'd do differently with more time. A candidate who gets 80% done and articulates the remaining 20% clearly tells us far more than a silent incomplete submission. We're assessing how you think, not just what you ship.</div>
+      <div class="del-item">
+        <div class="dnum">1</div>
+        <div>
+          <div class="dtitle">Workflow JSON Export</div>
+          <div class="ddesc">Export your completed n8n workflow as a JSON file. This allows our panel to inspect every node, connection, and configuration directly &mdash; including your HTTP Request node setup and prompt.</div>
+          <div class="dhow">How to export: Open your workflow in n8n &rarr; three-dot menu (top right) &rarr; <strong>Download</strong> &rarr; saves as a <code>.json</code> file.</div>
+        </div>
+      </div>
+      <div class="del-item">
+        <div class="dnum">2</div>
+        <div>
+          <div class="dtitle">Output Log &mdash; Shared Google Sheet Link</div>
+          <div class="ddesc">Your personal copy of the Output Log after running your workflow against all 51 rows. Share as a public viewer link. This is the primary evidence of your workflow's performance &mdash; including how it handled errors, duplicates, and edge cases.</div>
+          <div class="dhow">Share settings: File &rarr; Share &rarr; Anyone with the link &rarr; Viewer.</div>
+        </div>
+      </div>
+      <div class="del-item">
+        <div class="dnum">3</div>
+        <div>
+          <div class="dtitle">Video Walkthrough (Max 5 Minutes)</div>
+          <div class="ddesc">Record a brief video walking through your workflow. Structure it as: (1) what the problem is, (2) how your workflow solves it step by step including the API integration, (3) how it handles edge cases, (4) what value it creates for Patry. Assume your audience includes non-technical executives.</div>
+          <div class="dhow">The 5-minute limit is a hard constraint. Tight and purposeful is the goal.</div>
+        </div>
+      </div>
+      <div class="del-item">
+        <div class="dnum">4</div>
+        <div>
+          <div class="dtitle">Written ROI Note (Max 200 Words)</div>
+          <div class="ddesc">Estimate the annual value your solution creates for Patry. Use the 6&ndash;8 hours/week figure from the brief as your anchor. Convert to dollars. State your assumptions clearly. A credible $18K estimate scores higher than an inflated $500K claim with no supporting logic.</div>
+          <div class="dhow">Include this as a short written note in your submission form.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCORING -->
+  <div class="card">
+    <div class="ch"><span>&#128202;</span><h2>How You Are Scored</h2></div>
+    <div class="cb" style="padding:0">
+      <table class="score-table">
+        <tr><th>Section</th><th>Criterion</th><th>Points</th><th>What It Tests</th></tr>
+        <tr><td>1</td><td>Workflow Functionality</td><td class="wt">30</td><td>Does it run end-to-end? Does it handle edge cases without breaking?</td></tr>
+        <tr><td>2</td><td>Business Logic Accuracy</td><td class="wt">20</td><td>Does the HTTP Request node call the API correctly? Does your prompt classify urgency and trade type accurately? Does your workflow parse and act on the response correctly?</td></tr>
+        <tr><td>3</td><td>ROI Articulation</td><td class="wt">20</td><td>Is the value estimate specific, credible, and numerically grounded?</td></tr>
+        <tr><td>4</td><td>Complexity &amp; Creativity</td><td class="wt">15</td><td>Did you go beyond the minimum? Error handling, branching, response parsing sophistication, unexpected additions.</td></tr>
+        <tr><td>5</td><td>Communication Clarity</td><td class="wt">15</td><td>Can a non-technical executive watch your video and immediately understand the value?</td></tr>
+        <tr class="gate-row"><td colspan="2"><strong>&#128274; Minimum score to advance to interview</strong></td><td class="wt" style="color:#dc2626">65 / 100</td><td>Below 65 &mdash; candidacy ends at this stage.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- CONSTRAINTS -->
+  <div class="card">
+    <div class="ch"><span>&#9881;&#65039;</span><h2>Constraints &amp; Rules</h2></div>
+    <div class="con-row">
+      <span class="con-chip">&#128296; Your own n8n environment &mdash; cloud trial or local</span>
+      <span class="con-chip">&#129302; Anthropic API key provided &mdash; do not use your own</span>
+      <span class="con-chip">&#128202; Patry-provided data sheets &mdash; do not modify them</span>
+      <span class="con-chip">&#128230; All 4 submission components required</span>
+      <span class="con-chip">&#127909; Video max 5 minutes &mdash; hard limit</span>
+      <span class="con-chip">&#9997;&#65039; ROI note max 200 words</span>
+      <span class="con-chip">&#9201;&#65039; Submit by stated deadline &mdash; no extensions</span>
+      <span class="con-chip">&#9989; AI tools permitted for building &mdash; this is an AI assessment</span>
+    </div>
+    <div style="padding:0 22px 16px">
+      <div class="warn">&#9888;&#65039; <strong>Before your n8n trial expires:</strong> Export your workflow JSON immediately after completing it. Workspace deletion after trial expiry is permanent.</div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="card">
+    <div class="ch"><span>&#128197;</span><h2>Timeline</h2></div>
+    <div class="cb">
+      <div class="tl-row">
+        <div class="tl-step"><div class="tl-dot">1</div><div class="tl-lbl">Assessment Sent</div><div class="tl-time">Day 0</div></div>
+        <div class="tl-step"><div class="tl-dot">2</div><div class="tl-lbl">Set Up Environment</div><div class="tl-time">Day 1</div></div>
+        <div class="tl-step"><div class="tl-dot">3</div><div class="tl-lbl">Build &amp; Test</div><div class="tl-time">Days 1&ndash;6</div></div>
+        <div class="tl-step"><div class="tl-dot">4</div><div class="tl-lbl">Export JSON + Video</div><div class="tl-time">Day 6&ndash;7</div></div>
+        <div class="tl-step"><div class="tl-dot">5</div><div class="tl-lbl">Submit All 4 Components</div><div class="tl-time">Day 7</div></div>
+        <div class="tl-step"><div class="tl-dot">6</div><div class="tl-lbl">Score Returned</div><div class="tl-time">Within 5 days</div></div>
+      </div>
+      <p style="margin-top:16px;font-size:.8rem;color:#888;text-align:center">Late or incomplete submissions are not scored. All 4 components must be present.</p>
+    </div>
+  </div>
+
+  <div class="footer">Patry AI Fellowship &middot; Summer 2026 &middot; n8n Workflow Challenge &middot; Stage 2 of 4</div>
+</div>
+
+<script>
+function copyCode(btn) {
+  const block = btn.parentElement;
+  const text = block.innerText.replace('Copy', '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+</body>
+</html>
